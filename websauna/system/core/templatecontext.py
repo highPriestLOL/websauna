@@ -160,11 +160,13 @@ def friendly_time(jinja_ctx, context, **kw):
     else:
         tz = datetime.timezone.utc
 
+    locale = kw.get("locale", "en_US")
+
     # Make relative time between two timestamps
     now = now.astimezone(tz)
     arrow = Arrow.fromdatetime(now)
     other = Arrow.fromdatetime(datetime.datetime.utcnow())
-    return arrow.humanize(other)
+    return arrow.humanize(other, locale=locale)
 
 
 @contextfilter
