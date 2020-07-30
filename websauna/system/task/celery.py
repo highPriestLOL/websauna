@@ -13,6 +13,7 @@ def parse_celery_config(celery_config_python: str, *, settings) -> dict:
     # Expose timedelta object for config to be used in beat schedule
     # http://docs.celeryproject.org/en/master/userguide/periodic-tasks.html#beat-entries
     from datetime import timedelta  # noqa
+    from celery.schedules import crontab  # noqa
 
     _globals = globals().copy()
     _locals = locals().copy()
