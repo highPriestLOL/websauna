@@ -106,7 +106,9 @@ class DefaultSQLAlchemyFieldMapper(ColumnToFieldMapper):
             # <class 'sqlalchemy.ext.declarative.clsregistry._class_resolver'>
             remote_model = rel.argument()
         else:
-            remote_model = rel.argument
+            # Remains callable in latest versions of SQLAlchemy
+            # https://docs.sqlalchemy.org/en/14/orm/relationship_api.html#sqlalchemy.orm.relationship.params.argument
+            remote_model = rel.argument()
 
         # Get first column of the set
         for column in rel.local_columns:
