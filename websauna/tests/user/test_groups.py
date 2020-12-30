@@ -143,7 +143,7 @@ def test_user_group_choices_preserved_on_validation_error(web_server, init, brow
     b.find_by_css(".crud-row-1 .btn-crud-listing-edit").click()
 
     # We are in group 2 initially, assert checkbox is checked
-    assert b.find_by_css("input[type='checkbox'][value='{}'][checked='True']".format(group_uuid))
+    assert b.find_by_css("input[type='checkbox'][value='{}'][checked='checked']".format(group_uuid))
 
     # Do validation error by leaving username empty
     b.fill("username", "")
@@ -153,7 +153,7 @@ def test_user_group_choices_preserved_on_validation_error(web_server, init, brow
     # Both group checkboxes should be still selected
     with transaction.manager:
         for g in dbsession.query(Group).all():
-            assert b.find_by_css("input[type='checkbox'][value='{}'][checked='True']".format(uuid_to_slug(g.uuid)))
+            assert b.find_by_css("input[type='checkbox'][value='{}'][checked='checked']".format(uuid_to_slug(g.uuid)))
 
 
 def test_remove_user_from_group(web_server, init, browser, dbsession):

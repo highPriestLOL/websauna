@@ -251,7 +251,7 @@ def app_scaffold(request, cookiecutter_config) -> str:
         'version': '1.0.0a1',
         'create_virtualenv': 'No'
     }
-    template = 'https://github.com/websauna/cookiecutter-websauna-app/archive/master.zip'
+    template = 'https://github.com/ooduor/cookiecutter-websauna-app/archive/master.zip'
     cookiecutter(
         template,
         no_input=True,

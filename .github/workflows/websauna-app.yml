@@ -1,0 +1,89 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Websauna application
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-16.04
+
+    services:
+      postgres:
+        image: postgres:9.5
+        env:
+          POSTGRES_DB: websauna_test
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_PORT: 5432
+        ports:
+          # Maps port 5432 on service container to the host
+          - 5432:5432
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis
+        ports:
+          # Maps port 6379 on service container to the host
+          - 6379:6379
+        # Set health checks to wait until redis has started
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.6
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.6
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip install -e .[celery,dev,notebook,test,utils]
+    - name: geckodriver/firefox
+      run: |
+        echo "geckodriver/firefox"
+        which geckodriver
+        geckodriver --version
+        which firefox
+        firefox --version
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Start PostgreSQL
+      run: |
+        sudo service postgresql start
+    - name: Test with pytest
+      run: |
+        export PATH=$PATH:/usr/bin/geckodriver
+        export PATH=$PATH:/usr/bin/firefox
+        sudo cp /usr/bin/geckodriver /usr/local/bin/
+        sudo cp /usr/bin/firefox /usr/local/bin/
+        MOZ_HEADLESS=1 py.test websauna --ini websauna/conf/test.ini -s
+      env:
+        # use postgres for the host here because we have specified a container for the job.
+        # If we were running the job on the VM this would be localhost
+        POSTGRES_HOST: localhost
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: websauna_test
+        POSTGRES_PORT: 5432
